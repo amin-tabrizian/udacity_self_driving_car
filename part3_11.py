@@ -53,8 +53,8 @@ class Search:
         self.step += 1
         # print(self.step)
     def compute_policy(self):
-        policy = np.chararray((len(self.grid), len(self.grid[0])))
-        policy[:] =''
+        policy = np.zeros((len(self.grid), len(self.grid[0])), dtype=int)
+        # policy[:] =
         for i in range(len(self.grid)):
             max = 0
             for j in range(len(self.grid[0])):
@@ -63,8 +63,8 @@ class Search:
                        new_i =  action[0] + i
                        new_j = action[1] + j
                     if is_valid(new_i, new_j, self.grid):
-                        if max <= self.expansion_grid[new_i, new_j]:
-                            policy[i, j] = self.delta_name[idx]
+                        if max < self.expansion_grid[new_i, new_j]:
+                            policy[i, j] = idx
                             max = self.expansion_grid[new_i, new_j]
         return policy
     def compute(self, node = [0, 0, 0]):
@@ -81,6 +81,19 @@ class Search:
             self.visited_list.append(node)
         print("final", node)
         self.expansion_grid[node[1], node[2]] = self.step
+    def run_policy(self, policy):
+        path = np.chararray(policy.shape)
+        path[:] = ''
+        node = [0, 0]
+        n_node = node.copy()
+        while node != self.goal:
+            print(node)
+            path[node[0], node[1]] = delta_name[policy[node[0], node[1]]]
+            n_node[0] = node[0] + self.delta[policy[node[0], node[1]]][0]
+            n_node[1] = node[1] + self.delta[policy[node[0], node[1]]][1]
+            node = n_node.copy()
+        path[node[0], node[1]] = '*'
+        return path
 a = Search(grid, init, goal, delta, cost, delta_name)
 # print(a.open_list)
 # a.expand([0, 0, 0])
@@ -88,3 +101,4 @@ a = Search(grid, init, goal, delta, cost, delta_name)
 a.compute()
 print(a.expansion_grid)
 print(a.compute_policy())
+print(a.run_policy(a.compute_policy()).decode())
